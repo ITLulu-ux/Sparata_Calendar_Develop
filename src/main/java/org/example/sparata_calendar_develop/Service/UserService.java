@@ -8,6 +8,8 @@ import org.example.sparata_calendar_develop.Repository.CalendarRepository;
 import org.example.sparata_calendar_develop.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.servlet.http.HttpSession;
+import org.example.sparata_calendar_develop.Dto.LoginRequestDto;
 
 import java.util.List;
 
@@ -82,5 +84,17 @@ public class UserService {
         }
 
         userRepository.delete(user);
+    }
+
+    public void login(LoginRequestDto requestDto, HttpSession session) {
+        User user = userRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!user.getPassword().equals(requestDto.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        session.setAttribute("loginUserId", user.getId());
     }
 }

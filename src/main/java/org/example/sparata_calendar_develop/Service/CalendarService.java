@@ -85,7 +85,7 @@ public class CalendarService {
 
     // 일정 삭제
     @Transactional
-    public void delete(Long id, CalendarRequestDto requestDto) {
+    public void delete(Long id) {
         Calendar calendar = calendarRepository.findById(id)
                 .orElseThrow(() ->
                         new IllegalArgumentException("일정을 찾을 수 없습니다."));
