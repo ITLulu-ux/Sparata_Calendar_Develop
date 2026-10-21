@@ -1,5 +1,6 @@
 package org.example.sparata_calendar_develop.Controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.sparata_calendar_develop.Dto.UserRequestDto;
 import org.example.sparata_calendar_develop.Dto.UserResponseDto;
@@ -20,7 +21,7 @@ public class UserController {
     // 유저 생성
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(
-            @RequestBody UserRequestDto requestDto
+            @Valid @RequestBody UserRequestDto requestDto
     ) {
         UserResponseDto response = userService.createUser(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
