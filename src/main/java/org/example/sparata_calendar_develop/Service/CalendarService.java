@@ -5,30 +5,34 @@ import org.example.sparata_calendar_develop.Dto.CalendarRequestDto;
 import org.example.sparata_calendar_develop.Dto.CalendarResponseDto;
 import org.example.sparata_calendar_develop.Dto.CommentResponseDto;
 import org.example.sparata_calendar_develop.Entity.Calendar;
-import org.example.sparata_calendar_develop.Entity.Comment;
+import org.example.sparata_calendar_develop.Entity.User;
 import org.example.sparata_calendar_develop.Repository.CalendarRepository;
 import org.example.sparata_calendar_develop.Repository.CommentRepository;
+import org.example.sparata_calendar_develop.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor    // 생성자 자동 생성
+@RequiredArgsConstructor
 public class CalendarService {
 
     private final CalendarRepository calendarRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
-    // 새로운 일정 생성하고 저장
-    public CalendarResponseDto create(
-            CalendarRequestDto requestDto
-    ) {
+    // 일정 생성
+    @Transactional
+    public CalendarResponseDto create(CalendarRequestDto requestDto) {
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
         Calendar calendar = new Calendar(
                 requestDto.getTitle(),
                 requestDto.getContents(),
-                requestDto.getWriter(),
-                requestDto.getPassword()
+                user
         );
 
         Calendar savedCalendar = calendarRepository.save(calendar);
@@ -36,44 +40,35 @@ public class CalendarService {
         return new CalendarResponseDto(savedCalendar, List.of());
     }
 
-    // 모두 조회
+    // 일정 전체 조회
+    @Transactional(readOnly = true)
     public List<CalendarResponseDto> findAll(String writer) {
-        List<Calendar> calendars;
-
-        if (writer == null || writer.isBlank()) {
-            calendars =
-                    calendarRepository.findAllByOrderByModifiedAtDesc();
-        } else {
-            calendars =
-                    calendarRepository
-                            .findAllByWriterOrderByModifiedAtDesc(writer);
-        }
+        List<Calendar> calendars = calendarRepository
+                .findAllByOrderByModifiedAtDesc();
 
         return calendars.stream()
-                .map(calendar ->
-                        new CalendarResponseDto(calendar, List.of()))
+                .filter(calendar -> writer == null || writer.isBlank()
+                        || calendar.getUser().getUsername().equals(writer))
+                .map(calendar -> new CalendarResponseDto(calendar, List.of()))
                 .toList();
     }
 
-    // id로 조회
+    // 일정 상세 조회
+    @Transactional(readOnly = true)
     public CalendarResponseDto findById(Long id) {
         Calendar calendar = calendarRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "일정을 찾을 수 없습니다."
-                        ));
+                        new IllegalArgumentException("일정을 찾을 수 없습니다."));
 
         List<CommentResponseDto> comments =
-                commentRepository.findAllByScheduleId(id)
-                        .stream()
+                commentRepository.findAllByScheduleId(id).stream()
                         .map(CommentResponseDto::new)
                         .toList();
 
         return new CalendarResponseDto(calendar, comments);
     }
 
-    // 트랜잭션 동기화
-    // 수정
+    // 일정 수정
     @Transactional
     public CalendarResponseDto update(
             Long id,
@@ -81,42 +76,21 @@ public class CalendarService {
     ) {
         Calendar calendar = calendarRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "일정을 찾을 수 없습니다."
-                        ));
+                        new IllegalArgumentException("일정을 찾을 수 없습니다."));
 
-        if (!calendar.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException(
-                    "비밀번호가 일치하지 않습니다."
-            );
-        }
-
-        calendar.update(
-                requestDto.getTitle(),
-                requestDto.getWriter()
-        );
+        calendar.update(requestDto.getTitle());
 
         return new CalendarResponseDto(calendar, List.of());
     }
 
-    // 삭제
+    // 일정 삭제
     @Transactional
-    public void delete(
-            Long id,
-            CalendarRequestDto requestDto
-    ) {
+    public void delete(Long id, CalendarRequestDto requestDto) {
         Calendar calendar = calendarRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "일정을 찾을 수 없습니다."
-                        ));
-
-        if (!calendar.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException(
-                    "비밀번호가 일치하지 않습니다."
-            );
-        }
+                        new IllegalArgumentException("일정을 찾을 수 없습니다."));
 
         calendarRepository.delete(calendar);
     }
 }
+

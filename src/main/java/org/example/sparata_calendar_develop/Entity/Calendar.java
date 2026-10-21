@@ -1,10 +1,13 @@
 package org.example.sparata_calendar_develop.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.EntityListeners;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,14 +20,17 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Calendar {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // DB에 접근하는 엔터티 중 PK
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
     private String contents;
-    private String writer;
-    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -35,20 +41,14 @@ public class Calendar {
     protected Calendar() {
     }
 
-    public Calendar(
-            String title,
-            String contents,
-            String writer,
-            String password
-    ) {
+    public Calendar(String title, String contents, User user) {
         this.title = title;
         this.contents = contents;
-        this.writer = writer;
-        this.password = password;
+        this.user = user;
     }
 
-    public void update(String title, String writer) {
+    public void update(String title) {
         this.title = title;
-        this.writer = writer;
     }
 }
+

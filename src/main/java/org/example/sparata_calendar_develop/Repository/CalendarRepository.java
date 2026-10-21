@@ -10,7 +10,9 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
 
     List<Calendar> findAllByOrderByModifiedAtDesc();
 
-    List<Calendar> findAllByWriterOrderByModifiedAtDesc(String writer);
+    // List<Calendar> findAllByWriterOrderByModifiedAtDesc(String writer);
+
+    boolean existsByUserId(Long userId);
 
 
 }

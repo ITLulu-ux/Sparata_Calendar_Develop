@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.sparata_calendar_develop.Dto.UserRequestDto;
 import org.example.sparata_calendar_develop.Dto.UserResponseDto;
 import org.example.sparata_calendar_develop.Entity.User;
+import org.example.sparata_calendar_develop.Repository.CalendarRepository;
 import org.example.sparata_calendar_develop.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CalendarRepository calendarRepository;
 
     // 유저 생성
     @Transactional
@@ -71,6 +73,12 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "해당 유저를 찾을 수 없습니다. id=" + id
                 ));
+
+        if (calendarRepository.existsByUserId(id)) {
+            throw new IllegalStateException(
+                    "작성한 일정이 있어 유저를 삭제할 수 없습니다."
+            );
+        }
 
         userRepository.delete(user);
     }
