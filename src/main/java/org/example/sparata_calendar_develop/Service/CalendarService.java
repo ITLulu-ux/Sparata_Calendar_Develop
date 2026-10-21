@@ -11,6 +11,8 @@ import org.example.sparata_calendar_develop.Repository.CommentRepository;
 import org.example.sparata_calendar_develop.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -40,17 +42,15 @@ public class CalendarService {
         return new CalendarResponseDto(savedCalendar, List.of());
     }
 
-    // 일정 전체 조회
+    // 일정 페이지 조회
     @Transactional(readOnly = true)
-    public List<CalendarResponseDto> findAll(String writer) {
-        List<Calendar> calendars = calendarRepository
-                .findAllByOrderByModifiedAtDesc();
+    public Page<CalendarResponseDto> findAll(Pageable pageable) {
+        Page<Calendar> calendars =
+                calendarRepository.findAllByOrderByModifiedAtDesc(pageable);
 
-        return calendars.stream()
-                .filter(calendar -> writer == null || writer.isBlank()
-                        || calendar.getUser().getUsername().equals(writer))
-                .map(calendar -> new CalendarResponseDto(calendar, List.of()))
-                .toList();
+        return calendars.map(
+                calendar -> new CalendarResponseDto(calendar, List.of())
+        );
     }
 
     // 일정 상세 조회

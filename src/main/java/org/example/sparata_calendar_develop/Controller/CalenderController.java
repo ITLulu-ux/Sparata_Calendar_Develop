@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.sparata_calendar_develop.Dto.CalendarRequestDto;
 import org.example.sparata_calendar_develop.Dto.CalendarResponseDto;
 import org.example.sparata_calendar_develop.Service.CalendarService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +24,14 @@ public class CalenderController {
 
     private final CalendarService calendarService;
 
-    // 일정 전체 조회
+    // 일정 페이지 조회
     @GetMapping
-    public List<CalendarResponseDto> showCalendar(
-            @RequestParam(required = false) String writer
+    public Page<CalendarResponseDto> showCalendar(
+            @PageableDefault(size = 10, sort = "modifiedAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
-        return calendarService.findAll(writer);
+        return calendarService.findAll(pageable);
     }
 
     // id 별로 조회
