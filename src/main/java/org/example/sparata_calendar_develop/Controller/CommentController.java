@@ -1,0 +1,27 @@
+package org.example.sparata_calendar_develop.Controller;
+
+import lombok.RequiredArgsConstructor;
+import org.example.sparata_calendar_develop.Dto.CommentRequestDto;
+import org.example.sparata_calendar_develop.Dto.CommentResponseDto;
+import org.example.sparata_calendar_develop.Service.CommentService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/schedules")
+@RequiredArgsConstructor
+public class CommentController {
+
+    private final CommentService commentService;
+
+    // 댓글 수정
+    @PostMapping("/{scheduleId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponseDto addComment(
+            @PathVariable Long scheduleId,
+            @Valid @RequestBody CommentRequestDto requestDto
+    ) {
+        return commentService.create(scheduleId, requestDto);
+    }
+}
