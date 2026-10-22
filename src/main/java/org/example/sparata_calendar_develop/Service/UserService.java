@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpSession;
 import org.example.sparata_calendar_develop.Dto.LoginRequestDto;
+import org.example.sparata_calendar_develop.config.PasswordEncoder;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CalendarRepository calendarRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 유저 생성
     @Transactional
@@ -26,7 +28,7 @@ public class UserService {
         User user = new User(
                 requestDto.getUsername(),
                 requestDto.getEmail(),
-                requestDto.getPassword()
+                passwordEncoder.encode(requestDto.getPassword())
         );
 
         User savedUser = userRepository.save(user);
@@ -91,9 +93,16 @@ public class UserService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
-        if (!user.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+
+        if (!passwordEncoder.matches(
+                requestDto.getPassword(),
+                user.getPassword()
+        )) {
+            throw new IllegalArgumentException(
+                    "이메일 또는 비밀번호가 올바르지 않습니다."
+            );
         }
+
 
         session.setAttribute("loginUserId", user.getId());
     }
