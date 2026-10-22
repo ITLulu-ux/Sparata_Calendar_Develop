@@ -48,9 +48,12 @@ public class CalendarService {
         Page<Calendar> calendars =
                 calendarRepository.findAllByOrderByModifiedAtDesc(pageable);
 
-        return calendars.map(
-                calendar -> new CalendarResponseDto(calendar, List.of())
-        );
+        return calendars.map(calendar -> {
+            long commentCount =
+                    commentRepository.countByCalendarId(calendar.getId());
+
+            return new CalendarResponseDto(calendar, commentCount);
+        });
     }
 
     // 일정 상세 조회
