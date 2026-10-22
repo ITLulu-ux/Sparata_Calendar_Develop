@@ -1,4 +1,3 @@
-
 package org.example.sparata_calendar_develop.Dto;
 
 import jakarta.validation.constraints.NotBlank;
