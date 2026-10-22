@@ -1,11 +1,13 @@
 package org.example.sparata_calendar_develop.Entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.EntityListeners;
-
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -17,14 +19,20 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
+
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String contents;
-    private String writer;
-    private String password;
-    private Long scheduleId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
+    private Calendar calendar;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -35,20 +43,13 @@ public class Comment {
     protected Comment() {
     }
 
-    public Comment(
-            String contents,
-            String writer,
-            String password,
-            Long scheduleId
-    ) {
+    public Comment(String contents, User user, Calendar calendar) {
         this.contents = contents;
-        this.writer = writer;
-        this.password = password;
-        this.scheduleId = scheduleId;
+        this.user = user;
+        this.calendar = calendar;
     }
 
-//    public void update(String contents, String writer) {
-//        this.contents = contents;
-//        this.writer = writer;
-//    }
+    public void update(String contents) {
+        this.contents = contents;
+    }
 }

@@ -61,7 +61,7 @@ public class CalendarService {
                         new IllegalArgumentException("일정을 찾을 수 없습니다."));
 
         List<CommentResponseDto> comments =
-                commentRepository.findAllByScheduleId(id).stream()
+                commentRepository.findAllByCalendarId(id).stream()
                         .map(CommentResponseDto::new)
                         .toList();
 
